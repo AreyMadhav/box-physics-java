@@ -3,13 +3,13 @@ import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 
-public class box_physics extends JFrame implements KeyListener {
+public class BoxPhysicsV1 extends JFrame implements KeyListener {
 
     private JPanel panel;
     private int boxYPosition;
 
-    public box_physics() {
-        setTitle("Sky and Floor Background");
+    public BoxPhysicsV1() {
+        setTitle("BoxPhysicsV1");
         setSize(800, 600);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
@@ -88,6 +88,6 @@ public class box_physics extends JFrame implements KeyListener {
     }
 
     public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> new box_physics());
+        SwingUtilities.invokeLater(() -> new BoxPhysicsV1());
     }
 }
