@@ -1,9 +1,19 @@
+package com.mycompany.boxphysics;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 
 public class BoxPhysicsV3 extends JFrame implements KeyListener {
+
+    private static final int WINDOW_WIDTH = 800;
+    private static final int WINDOW_HEIGHT = 600;
+    private static final int BOX_WIDTH = 50;
+    private static final int BOX_HEIGHT = 50;
+    private static final int FLOOR_HEIGHT = WINDOW_HEIGHT / 2;
+    private static final int JUMP_DURATION = 300;
+    private static final int MOVE_AMOUNT = 10;
 
     private JPanel panel;
     private int boxYPosition;
@@ -12,7 +22,7 @@ public class BoxPhysicsV3 extends JFrame implements KeyListener {
 
     public BoxPhysicsV3() {
         setTitle("BoxPhysics");
-        setSize(800, 600);
+        setSize(WINDOW_WIDTH, WINDOW_HEIGHT);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
         setResizable(false);
@@ -29,8 +39,8 @@ public class BoxPhysicsV3 extends JFrame implements KeyListener {
         panel.setFocusable(true);
         panel.addKeyListener(this);
 
-        boxYPosition = getHeight() / 2 - 50;
-        boxXPosition = getWidth() / 2 - 25;
+        boxYPosition = FLOOR_HEIGHT - BOX_HEIGHT;
+        boxXPosition = (WINDOW_WIDTH - BOX_WIDTH) / 2;
         isJumping = false;
 
         add(panel);
@@ -39,15 +49,55 @@ public class BoxPhysicsV3 extends JFrame implements KeyListener {
 
     private void drawBackground(Graphics g) {
         g.setColor(new Color(135, 206, 235)); // Light blue color for sky
-        g.fillRect(0, 0, getWidth(), getHeight() / 2);
+        g.fillRect(0, 0, WINDOW_WIDTH, FLOOR_HEIGHT);
 
         g.setColor(new Color(34, 139, 34)); // Green color for floor
-        g.fillRect(0, getHeight() / 2, getWidth(), getHeight() / 2);
+        g.fillRect(0, FLOOR_HEIGHT, WINDOW_WIDTH, FLOOR_HEIGHT);
     }
 
     private void drawBox(Graphics g) {
         g.setColor(Color.RED); // Red color for the box
-        g.fillRect(boxXPosition, boxYPosition, 50, 50);
+        g.fillRect(boxXPosition, boxYPosition, BOX_WIDTH, BOX_HEIGHT);
+    }
+
+    private void moveLeft() {
+        if (boxXPosition > 0) {
+            boxXPosition -= MOVE_AMOUNT;
+            panel.repaint();
+        }
+    }
+
+    private void moveRight() {
+        if (boxXPosition < WINDOW_WIDTH - BOX_WIDTH) {
+            boxXPosition += MOVE_AMOUNT;
+            panel.repaint();
+        }
+    }
+
+    private void jump() {
+        if (!isJumping) {
+            isJumping = true;
+
+            new Thread(() -> {
+                long startTime = System.currentTimeMillis();
+
+                while (System.currentTimeMillis() - startTime <= JUMP_DURATION) {
+                    float t = (System.currentTimeMillis() - startTime) / (float) JUMP_DURATION;
+                    float easeInValue = t * t; // Ease-in quadratic function
+
+                    boxYPosition = FLOOR_HEIGHT - BOX_HEIGHT - (int) (easeInValue * 100);
+                    repaint();
+
+                    try {
+                        Thread.sleep(10);
+                    } catch (InterruptedException ex) {
+                        ex.printStackTrace();
+                    }
+                }
+
+                isJumping = false;
+            }).start();
+        }
     }
 
     @Override
@@ -59,48 +109,6 @@ public class BoxPhysicsV3 extends JFrame implements KeyListener {
             moveLeft();
         } else if (key == KeyEvent.VK_D) {
             moveRight();
-        }
-    }
-
-    private void moveLeft() {
-        if (boxXPosition > 0) {
-            boxXPosition -= 10; // Adjust the movement speed to your preference
-            panel.repaint();
-        }
-    }
-
-    private void moveRight() {
-        if (boxXPosition < getWidth() - 50) {
-            boxXPosition += 10; // Adjust the movement speed to your preference
-            panel.repaint();
-        }
-    }
-
-    private void jump() {
-        if (!isJumping) {
-            isJumping = true;
-
-            new Thread(() -> {
-                final int jumpDuration = 500; // Duration of the jump in milliseconds
-                final long startTime = System.currentTimeMillis();
-
-                for (long currentTime = startTime; currentTime - startTime <= jumpDuration; currentTime = System.currentTimeMillis()) {
-                    float t = (currentTime - startTime) / (float) jumpDuration;
-                    float easeInValue = t * t; // Ease-in quadratic function
-
-                    // Calculate the new Y position with the ease-in value
-                    boxYPosition = getHeight() / 2 - 100 - (int) (easeInValue * 100);
-
-                    panel.repaint();
-                    try {
-                        Thread.sleep(10);
-                    } catch (InterruptedException ex) {
-                        ex.printStackTrace();
-                    }
-                }
-
-                isJumping = false;
-            }).start();
         }
     }
 
